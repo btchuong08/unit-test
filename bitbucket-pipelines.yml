@@ -1,0 +1,73 @@
+image: node:16
+
+pipelines:
+  default:
+    - parallel:
+        - step:
+            name: Test with Node 16
+            caches:
+              - node
+            script:
+              - npm ci
+              - npm test
+              - npm test -- --coverage
+            artifacts:
+              - coverage/**
+        - step:
+            name: Test with Node 18
+            image: node:18
+            caches:
+              - node
+            script:
+              - npm ci
+              - npm test
+              - npm test -- --coverage
+            artifacts:
+              - coverage/**
+        - step:
+            name: Test with Node 20
+            image: node:20
+            caches:
+              - node
+            script:
+              - npm ci
+              - npm test
+              - npm test -- --coverage
+            artifacts:
+              - coverage/**
+
+  branches:
+    main:
+      - parallel:
+          - step:
+              name: Test with Node 16
+              caches:
+                - node
+              script:
+                - npm ci
+                - npm test
+                - npm test -- --coverage
+              artifacts:
+                - coverage/**
+          - step:
+              name: Test with Node 18
+              image: node:18
+              caches:
+                - node
+              script:
+                - npm ci
+                - npm test
+                - npm test -- --coverage
+              artifacts:
+                - coverage/**
+          - step:
+              name: Test with Node 20
+              image: node:20
+              caches:
+                - node
+              script:
+                - npm ci
+                - npm test
+                - npm test -- --coverage
+              artifacts:
+                - coverage/** 

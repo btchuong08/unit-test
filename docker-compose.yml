@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  test:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm test
+
+  test-watch:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run test:watch
+
+  test-coverage:
+    build: .
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm test -- --coverage 

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1747644904192" clover="3.2.0">
+  <project timestamp="1747644904192" name="All files">
+    <metrics statements="14" coveredstatements="14" conditionals="0" coveredconditionals="0" methods="10" coveredmethods="10" elements="24" coveredelements="24" complexity="0" loc="14" ncloc="14" packages="1" files="4" classes="4"/>
+    <file name="calculator.js" path="/Users/annhat/Documents/projects/unit-test/src/calculator.js">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+      <line num="2" count="1" type="stmt"/>
+      <line num="6" count="1" type="stmt"/>
+      <line num="9" count="1" type="stmt"/>
+    </file>
+    <file name="fetchData.js" path="/Users/annhat/Documents/projects/unit-test/src/fetchData.js">
+      <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="6"/>
+      <line num="2" count="1" type="stmt"/>
+      <line num="3" count="1" type="stmt"/>
+      <line num="8" count="1" type="stmt"/>
+      <line num="9" count="1" type="stmt"/>
+      <line num="13" count="1" type="stmt"/>
+    </file>
+    <file name="sum.js" path="/Users/annhat/Documents/projects/unit-test/src/sum.js">
+      <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <line num="2" count="1" type="stmt"/>
+      <line num="4" count="1" type="stmt"/>
+    </file>
+    <file name="userService.js" path="/Users/annhat/Documents/projects/unit-test/src/userService.js">
+      <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <line num="1" count="1" type="stmt"/>
+      <line num="4" count="1" type="stmt"/>
+      <line num="5" count="1" type="stmt"/>
+      <line num="8" count="1" type="stmt"/>
+    </file>
+  </project>
+</coverage>
