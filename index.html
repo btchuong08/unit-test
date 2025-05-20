@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Testing with Node.js & Jest</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCXdJf3AOw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Material Design Color Palette Variables - macOS inspired */
+        :root {
+            --md-primary: #0066cc;
+            /* macOS blue */
+            --md-primary-light: #4c9aff;
+            /* Lighter blue */
+            --md-primary-dark: #004c99;
+            /* Darker blue */
+            --md-secondary: #fa5c8e;
+            /* macOS pink */
+            --md-accent: #30d158; /* macOS green */
+            --md-surface: #ffffff;
+            /* White */
+            --md-background: #f5f5f7;
+            /* macOS light gray */
+            --md-on-surface: #1d1d1f;
+            /* macOS black */
+            --md-on-background: #4d4d4f;
+            /* macOS dark gray */
+            --md-error: #ff453a;
+            /* macOS red */
+            --md-code-background: #2c2c2e;
+            /* macOS dark background */
+            --md-code-text: #e4e4e4;
+            /* macOS light text */
+            --md-sidebar-width: 280px;
+            
+            /* macOS shadows */
+            --md-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --md-elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --md-elevation-4: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --md-elevation-8: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --md-elevation-12: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            
+            /* macOS Glassmorphism variables */
+            --glass-background: rgba(255, 255, 255, 0.72);
+            --glass-background-dark: rgba(40, 40, 45, 0.7);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.5);
+            --glass-blur: 20px;
+            
+            /* Animation variables */
+            --transition-fast: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+            --transition-standard: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            --transition-emphasized: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            
+            /* macOS Dot pattern */
+            --dot-size: 1px;
+            --dot-space: 16px;
+            --dot-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* Dark mode variables - macOS style */
+        [data-theme="dark"] {
+            --md-primary: #0a84ff;
+            --md-primary-light: #64b5f6;
+            --md-primary-dark: #0060df;
+            --md-secondary: #ff375f;
+            --md-accent: #30d158; /* macOS green */
+            --md-surface: #1c1c1e;
+            --md-background: #000000;
+            --md-on-surface: #f5f5f7;
+            --md-on-background: #a1a1a6;
+            --md-error: #ff453a;
+            --md-code-background: #2c2c2e;
+            --md-code-text: #f5f5f7;
+            
+            /* Glassmorphism variables for dark mode */
+            --glass-background: rgba(32, 32, 36, 0.7);
+            --glass-background-dark: rgba(24, 24, 26, 0.8);
+            --glass-border: 1px solid rgba(140, 140, 140, 0.15);
+            
+            /* Dark mode dot pattern */
+            --dot-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* General Body and Container Styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--md-background);
+            color: var(--md-on-background);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Slide Specific Styling */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 20px;
+            padding-top: 58px; /* Space for title bar */
+            box-sizing: border-box;
+            background-color: var(--md-surface);
+            color: var(--md-on-surface);
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px) scale(0.98);
+            transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
+                      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), 
+                      visibility 0.7s;
+            z-index: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            z-index: 1;
+        }
+
+        /* Content container for scrollable content */
+        .slide-content {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 50px;
+            padding-bottom: 60px; /* Add padding at bottom for better scrolling experience */
+            box-sizing: border-box;
+        }
+        
+        /* Remove top margin from first heading in each slide */
+        .slide-content h2:first-child {
+            margin-top: 0;
+        }
+        
+        .slide-content h1:first-child + h2 {
+            margin-top: 24px; /* Maintain spacing after h1 */
+        }
+
+        /* macOS window styling */
+        #presentation-container {
+            position: relative;
+            width: calc(100vw - 40px);
+            height: calc(100vh - 40px);
+            max-width: 1600px;
+            max-height: 900px;
+            margin: 0 auto;
+            background-color: var(--md-surface);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--md-elevation-4);
+            transition: margin-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.menu-open #presentation-container {
+            margin-left: var(--md-sidebar-width);
+            width: calc(100vw - var(--md-sidebar-width) - 40px);
+        }
+
+        /* macOS window title bar */
+        .title-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 38px;
+            background-color: var(--glass-background);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            z-index: 100;
+        }
+
+        [data-theme="dark"] .title-bar {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+            margin-right: 15px;
+        }
+
+        .window-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: default;
+        }
+
+        .window-close {
+            background-color: #ff5f57;
+            border: 1px solid #e04343;
+        }
+
+        .window-minimize {
+            background-color: #ffbd2e;
+            border: 1px solid #dea123;
+        }
+
+        .window-maximize {
+            background-color: #28c940;
+            border: 1px solid #1dab34;
+        }
+
+        .window-title {
+            color: var(--md-on-background);
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        /* Slide Menu Styling - macOS style sidebar */
+        #slide-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--md-sidebar-width);
+            height: 100vh;
+            background-color: var(--glass-background);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-right: var(--glass-border);
+            box-shadow: var(--md-elevation-2);
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding-top: 60px;
+        }
+
+        #slide-menu.collapsed {
+            transform: translateX(-100%);
+        }
+
+        /* Menu toggle button */
+        #menu-toggle {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 110;
+            background-color: var(--glass-background);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: none;
+            color: var(--md-on-background);
+            border-radius: 6px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: none;
+            transition: all var(--transition-standard);
+            overflow: hidden;
+            outline: none;
+        }
+
+        #menu-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] #menu-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #menu-toggle .menu-icon {
+            position: relative;
+            width: 16px;
+            height: 2px;
+            background-color: var(--md-on-background);
+            transition: all 0.3s ease;
+            border-radius: 1px;
+        }
+
+        #menu-toggle .menu-icon::before,
+        #menu-toggle .menu-icon::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 2px;
+            background-color: var(--md-on-background);
+            transition: all 0.3s ease;
+            left: 0;
+            border-radius: 1px;
+        }
+
+        #menu-toggle .menu-icon::before {
+            top: -5px;
+        }
+
+        #menu-toggle .menu-icon::after {
+            top: 5px;
+        }
+
+        body.menu-open #menu-toggle {
+            background-color: transparent;
+        }
+
+        .slide-menu-item {
+            padding: 10px 16px;
+            margin: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all var(--transition-standard);
+            display: flex;
+            align-items: center;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-menu-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: translateX(2px);
+        }
+
+        [data-theme="dark"] .slide-menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .slide-menu-item.active {
+            background-color: var(--md-primary);
+            color: white;
+        }
+
+        .slide-menu-item .slide-number {
+            width: 24px;
+            height: 24px;
+            background-color: transparent;
+            color: var(--md-on-background);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            font-size: 0.85em;
+            flex-shrink: 0;
+            box-shadow: none;
+            font-weight: 500;
+        }
+
+        .slide-menu-item.active .slide-number {
+            color: white;
+        }
+
+        .slide-menu-item .slide-title {
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+            font-weight: 400;
+            letter-spacing: 0;
+        }
+
+        .slide-menu-item.active .slide-title {
+            font-weight: 500;
+        }
+
+        /* Controls - macOS style */
+        #controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            background-color: var(--glass-background);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            border: var(--glass-border);
+            z-index: 1000;
+            align-items: center;
+        }
+
+        #controls button {
+            position: relative;
+            overflow: hidden;
+            background-color: transparent;
+            color: var(--md-on-background);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all var(--transition-standard);
+            letter-spacing: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        #controls button i {
+            font-size: 18px;
+        }
+
+        #controls button:hover:not(:disabled) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] #controls button:hover:not(:disabled) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #controls button:active:not(:disabled) {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] #controls button:active:not(:disabled) {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        #controls button:disabled {
+            color: var(--md-on-background);
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        #slide-counter {
+            color: var(--md-on-background);
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            font-weight: 400;
+            letter-spacing: 0;
+            padding: 6px 12px;
+        }
+
+        /* Slide selector - macOS style */
+        #slide-selector {
+            background-color: transparent;
+            color: var(--md-on-background);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 6px 24px 6px 10px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 4px center;
+            background-size: 16px;
+            padding-right: 24px;
+            outline: none;
+            transition: all 0.2s ease;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        [data-theme="dark"] #slide-selector {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23FFFFFF" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+        }
+
+        #slide-selector:hover {
+            border-color: var(--md-primary);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] #slide-selector:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #slide-selector option {
+            background-color: var(--md-surface);
+            color: var(--md-on-surface);
+            padding: 8px;
+        }
+
+        /* Progress bar - macOS style */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: var(--md-primary);
+            width: 0%;
+            transition: width 0.3s ease;
+            z-index: 1100;
+            opacity: 0.8;
+        }
+
+        /* Theme toggle - macOS style */
+        #theme-toggle {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            width: 30px;
+            height: 30px;
+            background-color: var(--glass-background);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: none;
+            color: var(--md-on-background);
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1100;
+            box-shadow: none;
+            transition: all var(--transition-standard);
+            overflow: hidden;
+        }
+
+        #theme-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] #theme-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #theme-toggle i {
+            font-size: 18px;
+            transition: transform var(--transition-standard);
+        }
+
+        /* Keyboard help - macOS style */
+        #keyboard-help {
+            position: fixed;
+            bottom: 90px;
+            right: 12px;
+            width: 30px;
+            height: 30px;
+            background-color: var(--glass-background);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: none;
+            color: var(--md-on-background);
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 1100;
+            box-shadow: none;
+            transition: all var(--transition-standard);
+        }
+
+        #keyboard-help:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] #keyboard-help:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #keyboard-help i {
+            font-size: 18px;
+        }
+
+        /* macOS Typography */
+        h1 {
+            font-size: 3.6em;
+            color: var(--md-on-surface);
+            margin-bottom: 24px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.4em;
+            color: var(--md-on-surface);
+            margin-bottom: 20px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+        }
+
+        h3 {
+            font-size: 1.8em;
+            color: var(--md-on-surface);
+            margin-bottom: 16px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+        }
+
+        p {
+            font-size: 1.25em;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: var(--md-on-background);
+            max-width: 900px;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+        }
+
+        /* Code Snippets - macOS style */
+        pre {
+            background-color: var(--md-code-background);
+            color: var(--md-code-text);
+            padding: 28px;
+            border-radius: 8px;
+            overflow-x: auto;
+            text-align: left;
+            max-width: 90%;
+            margin: 24px auto;
+            font-size: 0.9em;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+            position: relative;
+        }
+
+        pre::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 12px;
+            height: 12px;
+            background-color: #FF5F56;
+            border-radius: 50%;
+            box-shadow: 20px 0 0 #FFBD2E, 40px 0 0 #27C93F;
+        }
+        
+        pre code {
+            padding-top: 16px;
+            display: block;
+            font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'Menlo', Consolas, 'Liberation Mono', monospace;
+            font-size: 14px;
+        }
+
+        /* macOS style icon row */
+        .icon-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .icon-row i.material-icons-round {
+            font-size: 48px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: rgba(0, 0, 0, 0.05);
+            transition: all var(--transition-standard);
+        }
+
+        [data-theme="dark"] .icon-row i.material-icons-round {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .icon-row i.material-icons-round:hover {
+            transform: translateY(-3px);
+            background-color: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="dark"] .icon-row i.material-icons-round:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Visual placeholders */
+        .visual-placeholder img {
+            max-width: 600px;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 24px;
+        }
+
+        .small-image {
+            max-width: 300px !important;
+        }
+
+        .medium-image {
+            max-width: 450px !important;
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            max-width: 900px;
+            margin: 24px auto;
+        }
+
+        ul li {
+            font-size: 1.2em;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            padding-left: 30px;
+            position: relative;
+            color: var(--md-on-background);
+            font-weight: 400;
+        }
+
+        ul li::before {
+            content: '\2022';
+            color: var(--md-primary);
+            font-size: 1.5em;
+            position: absolute;
+            left: 8px;
+            top: -0.2em;
+            line-height: inherit;
+        }
+
+        /* Keyboard shortcuts modal - macOS style */
+        #shortcut-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.25);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        #shortcut-modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--md-surface);
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #shortcut-modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-weight: 500;
+            font-size: 1.2em;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--md-on-background);
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 5px;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .shortcuts-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .shortcuts-list li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease;
+            padding-left: 10px; /* Override default padding from regular list items */
+        }
+
+        /* Remove bullet points from shortcut list items */
+        .shortcuts-list li::before {
+            content: none; /* Override the default bullet point */
+            display: none;
+        }
+
+        .shortcuts-list li:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .shortcuts-list li:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .key {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--md-on-background);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', SFMono-Regular, monospace;
+            font-size: 0.85em;
+            font-weight: 500;
+            min-width: 24px;
+            text-align: center;
+            transition: all 0.2s ease;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        [data-theme="dark"] .key {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .key-action {
+            flex-grow: 1;
+            color: var(--md-on-background);
+            font-size: 0.95em;
+            text-align: right;
+        }
+
+        /* Add macOS-style scrollbar styling */
+        .slide::-webkit-scrollbar {
+            width: 9px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border: 2px solid var(--md-surface);
+        }
+
+        .slide::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .slide::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        [data-theme="dark"] .slide::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Mobile and Responsive Styles */
+        @media (max-width: 768px) {
+            /* General container adjustments */
+            #presentation-container {
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+                max-width: none;
+                max-height: none;
+            }
+            
+            body.menu-open #presentation-container {
+                display: none; /* Hide content when menu is open on mobile */
+            }
+            
+            /* Slide content adjustments */
+            .slide-content {
+                padding: 20px;
+                padding-bottom: 70px;
+            }
+            
+            /* Typography adjustments */
+            h1 {
+                font-size: 2.2em;
+            }
+            
+            h2 {
+                font-size: 1.8em;
+            }
+            
+            h3 {
+                font-size: 1.4em;
+            }
+            
+            p, ul li {
+                font-size: 1em;
+            }
+            
+            /* Controls positioning */
+            #controls {
+                bottom: 15px;
+                width: 90%;
+                padding: 8px;
+            }
+            
+            #controls button {
+                padding: 8px 12px;
+                font-size: 0.85em;
+            }
+            
+            #controls button i {
+                font-size: 16px;
+            }
+            
+            /* Title bar adjustments */
+            .title-bar {
+                height: 36px;
+            }
+            
+            .window-title {
+                font-size: 12px;
+                max-width: 70%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            /* Menu adjustments */
+            #slide-menu {
+                width: 100%;
+                z-index: 200;
+            }
+            
+            /* Make navigation buttons more touch-friendly */
+            #menu-toggle, #theme-toggle, #keyboard-help {
+                width: 40px;
+                height: 40px;
+            }
+            
+            /* Adjust slide padding for mobile */
+            .slide {
+                padding-top: 48px; /* Adjusted for smaller title bar */
+            }
+            
+            /* Keyboard shortcuts modal */
+            .modal-content {
+                width: 95%;
+                max-height: 85vh;
+            }
+            
+            /* Adjust image sizes */
+            .visual-placeholder img {
+                max-width: 100%;
+            }
+            
+            .small-image, .medium-image {
+                max-width: 100% !important;
+            }
+            
+            /* Code blocks */
+            pre {
+                padding: 16px;
+                font-size: 0.8em;
+                max-width: 100%;
+            }
+            
+            code {
+                font-size: 13px;
+            }
+        }
+        
+        /* Small phones */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+            }
+            
+            h3 {
+                font-size: 1.2em;
+            }
+            
+            /* Make buttons more compact */
+            #controls {
+                gap: 6px;
+            }
+            
+            #controls button {
+                padding: 6px 10px;
+            }
+            
+            /* Hide text on navigation buttons, show only icons */
+            #prev-button span, #next-button span {
+                display: none;
+            }
+            
+            #slide-counter {
+                min-width: 60px;
+                text-align: center;
+            }
+            
+            /* Hide dropdown on very small screens */
+            #slide-selector {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progress-bar"></div>
+    
+    <button id="menu-toggle" aria-label="Toggle menu" aria-expanded="false">
+        <span class="menu-icon"></span>
+    </button>
+    
+    <button id="theme-toggle" aria-label="Toggle dark mode">
+        <i class="material-icons-round">dark_mode</i>
+    </button>
+    
+    <button id="keyboard-help" aria-label="Keyboard shortcuts help">
+        <i class="material-icons-round">keyboard</i>
+    </button>
+
+    <div id="shortcut-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Keyboard Shortcuts</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <ul class="shortcuts-list">
+                <li><span class="key">→</span><span class="key-action">Next slide</span></li>
+                <li><span class="key">←</span><span class="key-action">Previous slide</span></li>
+                <li><span class="key">Home</span><span class="key-action">First slide</span></li>
+                <li><span class="key">End</span><span class="key-action">Last slide</span></li>
+                <li><span class="key">1-9</span><span class="key-action">Go to slide number</span></li>
+                <li><span class="key">M</span><span class="key-action">Toggle menu</span></li>
+                <li><span class="key">T</span><span class="key-action">Toggle dark/light theme</span></li>
+                <li><span class="key">?</span><span class="key-action">Show/hide keyboard shortcuts</span></li>
+                <li><span class="key">Esc</span><span class="key-action">Close dialogs</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="slide-menu" class="collapsed">
+        <!-- Will be populated by JavaScript -->
+    </div>
+
+    <div id="presentation-container">
+        <div class="title-bar">
+            <div class="window-controls">
+                <div class="window-button window-close"></div>
+                <div class="window-button window-minimize"></div>
+                <div class="window-button window-maximize"></div>
+            </div>
+            <div class="window-title">Unit Testing with Node.js & Jest</div>
+        </div>
+
+        <section id="slide1" class="slide active" data-slide-id="1">
+            <div class="slide-content">
+                <h1>Unit Testing with Node.js & Jest</h1>
+                <h2>Building Robust and Reliable Node.js Applications</h2>
+                <p>Chuong Bui / Picking Team / May 2025</p>
+                <div class="visual-placeholder">
+                    <img class="medium-image"
+                        src="https://www.tatvasoft.com/outsourcing/wp-content/uploads/2022/04/What-is-Unit-testing_-1280x720.jpg"
+                        alt="Abstract code background">
+                </div>
+            </div>
+        </section>
+
+        <section id="slide2" class="slide" data-slide-id="2">
+            <div class="slide-content">
+                <h2>Hi Team! What's Our Goal Today?</h2>
+                <ul>
+                    <li>Understand <strong>Why</strong> Unit Testing is Essential</li>
+                    <li>Learn the <strong>Basics of Jest</strong> for Node.js</li>
+                    <li>Master Key Jest Concepts (<strong>Assertions, Mocking, Async</strong>)</li>
+                    <li><strong>Integrate Testing</strong> into Our Workflow</li>
+                    <li>Build <strong>Confidence</strong> in Our Code!</li>
+                </ul>
+                <div class="visual-placeholder">
+                    <img class="small-image"
+                        src="https://static.vecteezy.com/system/resources/previews/015/412/031/non_2x/darts-hit-to-center-of-dartboard-arrow-on-bullseye-in-target-business-success-investment-goal-opportunity-challenge-aim-strategy-achievement-focus-concept-illustration-vector.jpg"
+                        alt="Dartboard with arrow hitting bullseye">
+                    <p>Our Target: Better Code!</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide3" class="slide" data-slide-id="3">
+            <div class="slide-content">
+                <h2>What is Unit Testing? (The Core Idea)</h2>
+                <ul>
+                    <li>Testing <strong>Small, Isolated Parts:</strong> Focus on the smallest testable piece of code (a
+                        function, a method).</li>
+                    <li><strong>Independent:</strong> Each test should run independently.</li>
+                    <li><strong>Fast:</strong> Unit tests should execute quickly.</li>
+                    <li><strong>Focus:</strong> Verify a single piece of logic works as expected.</li>
+                </ul>
+                <div class="visual-placeholder">
+                    <img class="medium-image"
+                        src="https://www.spaceo.ca/_next/image/?url=https%3A%2F%2Fwp.spaceo.ca%2Fwp-content%2Fuploads%2F2024%2F08%2FWhat-is-Unit-Testing-2x.jpg&w=3840&q=75"
+                        alt="Colorful building blocks">
+                    <p>Breaking down the big problem</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide4" class="slide" data-slide-id="4">
+            <div class="slide-content">
+                <h2>Why Unit Test? The Benefits for Us</h2>
+                <ul>
+                    <li><strong>Early Bug Detection:</strong> Catch issues before they hit production.</li>
+                    <li><strong>Refactoring Confidence:</strong> Change code without fear of breaking existing
+                        functionality.</li>
+                    <li><strong>Improved Code Quality:</strong> Forces better design (e.g., pure functions, clear
+                        responsibilities).</li>
+                    <li><strong>Living Documentation:</strong> Tests describe how code *should* behave.</li>
+                    <li><strong>Faster Feedback Loop:</strong> No more lengthy manual testing.</li>
+                    <li><strong>Team Confidence:</strong> Deploy with greater assurance.</li>
+                </ul>
+                <div class="visual-placeholder icon-row">
+                    <i class="material-icons-round" style="color: var(--md-error);">bug_report</i>
+                    <i class="material-icons-round" style="color: #FFB300;">build</i>
+                    <i class="material-icons-round" style="color: #4CAF50;">verified_user</i>
+                    <i class="material-icons-round" style="color: #2196F3;">description</i>
+                    <i class="material-icons-round" style="color: #9C27B0;">timer</i>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide5" class="slide" data-slide-id="5">
+            <div class="slide-content">
+                <h2>The Testing Pyramid</h2>
+                <p>Unit tests form the bedrock – numerous, fast, and foundational.</p>
+                <div class="visual-placeholder">
+                    <img src="https://i0.wp.com/spurqlabs.com/wp-content/uploads/2024/09/6.png?resize=1080%2C720&ssl=1"
+                        alt="Abstract pyramid structure" style="opacity: 0.8;">
+                    <p style="font-size: 1.1em; color: var(--md-on-background);">
+                        <em>(Imagine "Unit Tests" at the bottom, "Integration" in middle, "E2E" at top)</em><br>
+                        Learn more: <a href="https://martinfowler.com/articles/practical-test-pyramid.html" target="_blank"
+                            style="color: var(--md-primary);">The Practical Test Pyramid</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="slide6" class="slide" data-slide-id="6">
+            <div class="slide-content">
+                <h2>Enter Jest: Our Testing Framework</h2>
+                <ul>
+                    <li><strong>"Batteries Included":</strong> Assertion library, test runner, mocking library built-in.
+                    </li>
+                    <li><strong>Great Developer Experience (DX):</strong> Intuitive API, excellent error messages.</li>
+                    <li><strong>Popular & Maintained:</strong> Widely used in the Node.js/React ecosystem.</li>
+                    <li><strong>Fast:</strong> Parallel test execution.</li>
+                    <li><strong>Snapshot Testing:</strong> (Mention briefly as a bonus feature, not core focus).</li>
+                </ul>
+                <div class="visual-placeholder">
+                    <img class="medium-image" src="https://decentro.tech/blog/wp-content/uploads/Jest-Tech-Blog.jpeg"
+                        alt="Jest Logo">
+                </div>
+            </div>
+        </section>
+
+        <section id="slide7" class="slide" data-slide-id="7">
+            <div class="slide-content">
+                <h2>Getting Started: Installation & Setup</h2>
+                <pre><code>npm init -y
+npm install --save-dev jest
+</code></pre>
+                <pre><code>// package.json
+{
+  "name": "my-node-app",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest"
+  }
+}
+</code></pre>
+                <p>Jest works out-of-the-box!</p>
+            </div>
+        </section>
+
+        <section id="slide8" class="slide" data-slide-id="8">
+            <div class="slide-content">
+                <h2>Our First Test: `sum.js`</h2>
+                <pre><code>// src/sum.js
+export const sum = (a, b) => a + b;
+
+// Using CommonJS is also valid
+// module.exports = sum;
+</code></pre>
+                <pre><code>// __tests__/sum.test.js
+import { sum } from '../src/sum';
+
+test('adds 1 + 2 to equal 3', () => {
+  expect(sum(1, 2)).toBe(3);
+});
+</code></pre>
+                <ul>
+                    <li>`test()` or `it()`: Defines a test case.</li>
+                    <li>`expect()`: The value you want to test.</li>
+                    <li>`toBe()`: A "matcher" for strict equality.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide9" class="slide" data-slide-id="9">
+            <div class="slide-content">
+                <h2>Running Tests & Basic Assertions</h2>
+                <pre><code>npm test
+# or
+npx jest
+</code></pre>
+                <pre><code>// Modern Jest matchers
+expect(value).toEqual(anotherValue); // Deep equality for objects/arrays
+expect(value).not.toBeNull();
+expect(value).toBeUndefined();
+expect(value).toBeTruthy();
+expect(value).toBeFalsy();
+expect(array).toContain(item);
+expect(object).toHaveProperty('key.nested');
+expect(string).toMatch(/regex/);
+expect(() => fn()).toThrow();
+
+// Newer Jest matchers
+expect(fn).toHaveReturned(); // Was the function successfully returned from?
+expect(mockFn).toHaveBeenCalledOnce(); // Was it called exactly once?
+expect(value).toStrictEqual(other); // Stricter than toEqual (no type conversion)
+expect(array).toContainEqual({id: 1}); // Contains object with equal fields
+</code></pre>
+                <p>Jest provides a rich set of matchers.</p>
+            </div>
+        </section>
+
+        <section id="slide10" class="slide" data-slide-id="10">
+            <div class="slide-content">
+                <h2>Organizing Tests with `describe`</h2>
+                <pre><code>// __tests__/calculator.test.js
+import { add, subtract } from '../src/calculator';
+
+describe('Calculator operations', () => {
+  test('add function should correctly sum two numbers', () => {
+    expect(add(5, 3)).toBe(8);
+  });
+
+  it('subtract function should correctly subtract two numbers', () => {
+    expect(subtract(10, 4)).toBe(6);
+  });
+});
+</code></pre>
+                <p>`describe()` groups related tests, making output clearer.</p>
+            </div>
+        </section>
+
+        <section id="slide11" class="slide" data-slide-id="11">
+            <div class="slide-content">
+                <h2>Setup & Teardown: `beforeEach`, `afterEach`</h2>
+                <pre><code>describe('User management', () => {
+  let users = [];
+
+  beforeEach(() => {
+    // Runs before *each* test in this describe block
+    users = ['Alice', 'Bob'];
+    console.log('Setup for a test');
+  });
+
+  afterEach(() => {
+    // Runs after *each* test
+    users = [];
+    console.log('Cleanup after a test');
+  });
+
+  test('should add a new user', () => {
+    users.push('Charlie');
+    expect(users).toContain('Charlie');
+    expect(users).toHaveLength(3);
+  });
+});
+</code></pre>
+                <ul>
+                    <li>`beforeAll`/`afterAll`: Once for all tests in `describe`.</li>
+                    <li>`beforeEach`/`afterEach`: Before/after *each* test.</li>
+                    <li>Ideal for resetting state or setting up shared resources.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide12" class="slide" data-slide-id="12">
+            <div class="slide-content">
+                <h2>Testing Asynchronous Code</h2>
+                <pre><code>// src/fetchData.js
+export const fetchData = () => {
+  return new Promise(resolve => {
+    setTimeout(() => resolve('peanut butter'), 100);
+  });
+};
+
+export const fetchDataThatFails = () => {
+  return new Promise((_, reject) => {
+    setTimeout(() => reject(new Error('error fetching data')), 100);
+  });
+};
+</code></pre>
+                <pre><code>// Modern async testing approaches
+import { fetchData, fetchDataThatFails } from '../src/fetchData';
+
+// Approach 1: Using async/await (clean and readable)
+test('the data is peanut butter', async () => {
+  const data = await fetchData();
+  expect(data).toBe('peanut butter');
+});
+
+// Approach 2: Using resolves/rejects matchers (even cleaner)
+test('data promise resolves to peanut butter', () => {
+  return expect(fetchData()).resolves.toBe('peanut butter');
+});
+
+test('fetching data fails with error', () => {
+  return expect(fetchDataThatFails()).rejects.toThrow('error fetching data');
+});
+</code></pre>
+                <p>Jest handles Promises and `async/await` gracefully.</p>
+            </div>
+        </section>
+
+        <section id="slide13" class="slide" data-slide-id="13">
+            <div class="slide-content">
+                <h2>Mocking: The Key to Isolation</h2>
+                <ul>
+                    <li><strong>Why Mock?</strong> Isolate the "unit under test" from its dependencies (e.g., database,
+                        external APIs, file system).</li>
+                    <li><strong>Control Behavior:</strong> Simulate different scenarios (success, error, specific return
+                        values).</li>
+                    <li><strong>Speed:</strong> Avoid slow external calls.</li>
+                </ul>
+                <p><strong>Analogy:</strong> A stunt double in a movie. The main actor (your unit) performs, but the
+                    dangerous/complex parts are handled by a substitute (mock).</p>
+            </div>
+        </section>
+
+        <section id="slide14" class="slide" data-slide-id="14">
+            <div class="slide-content">
+                <h2>`jest.fn()`: Mocking Functions</h2>
+                <pre><code>// Modern mocking syntax
+const mockCallback = jest.fn(x => 42 + x);
+
+mockCallback(0); // Call it
+mockCallback(1);
+
+// Modern assertions
+expect(mockCallback).toHaveBeenCalledTimes(2);
+expect(mockCallback).toHaveBeenCalledWith(0);
+expect(mockCallback).toHaveBeenLastCalledWith(1);
+expect(mockCallback).toHaveReturnedWith(43); // Last return value
+
+// Detailed inspection still available
+console.log(mockCallback.mock.calls); // All calls: [[0], [1]]
+console.log(mockCallback.mock.results); // All results
+</code></pre>
+                <ul>
+                    <li>Create a blank mock function.</li>
+                    <li>Track calls, arguments, and return values.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide15" class="slide" data-slide-id="15">
+            <div class="slide-content">
+                <h2>Controlling Mock Behavior</h2>
+                <pre><code>// Modern mock controls
+const mockFn = jest.fn();
+
+// Example 1: Return values
+mockFn.mockReturnValueOnce(true).mockReturnValue(false);
+expect(mockFn()).toBe(true);
+expect(mockFn()).toBe(false);
+
+// Example 2: For async functions
+const getUser = jest.fn()
+  .mockResolvedValueOnce({ id: 1, name: 'Jane' })
+  .mockResolvedValue({ id: 1, name: 'John' });
+
+await expect(getUser()).resolves.toEqual({ id: 1, name: 'Jane' });
+await expect(getUser()).resolves.toEqual({ id: 1, name: 'John' });
+
+// Example 3: Rejecting promises
+const failingFn = jest.fn().mockRejectedValue(new Error('API error'));
+await expect(failingFn()).rejects.toThrow('API error');
+</code></pre>
+                <ul>
+                    <li>`mockReturnValue(value)`: Sets a return value.</li>
+                    <li>`mockResolvedValue(value)`: Sets a resolved promise value.</li>
+                    <li>`mockImplementation(fn)`: Provides a custom implementation.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide16" class="slide" data-slide-id="16">
+            <div class="slide-content">
+                <h2>`jest.mock()`: Mocking Modules</h2>
+                <h3>Scenario: Testing a service that uses `axios` to fetch data.</h3>
+                <pre><code>// src/userService.js
+import axios from 'axios';
+
+export const getUser = async (id) => {
+  const response = await axios.get(`https://api.example.com/users/${id}`);
+  return response.data;
+};
+
+export const createUser = async (userData) => {
+  const response = await axios.post('https://api.example.com/users', userData);
+  return response.data;
+};
+</code></pre>
+                <pre><code>// __tests__/userService.test.js
+import { getUser, createUser } from '../src/userService';
+import axios from 'axios';
+
+// Mock the entire axios module
+jest.mock('axios');
+
+describe('userService', () => {
+  test('should fetch user data', async () => {
+    // Setup the mock return value
+    axios.get.mockResolvedValue({
+      data: { id: 1, name: 'Test User' }
+    });
+
+    const user = await getUser(1);
+    
+    expect(user.name).toBe('Test User');
+    expect(axios.get).toHaveBeenCalledWith('https://api.example.com/users/1');
+  });
+  
+  test('should create a new user', async () => {
+    const newUser = { name: 'New User' };
+    const createdUser = { id: 2, name: 'New User' };
+    
+    axios.post.mockResolvedValue({ data: createdUser });
+    
+    const result = await createUser(newUser);
+    
+    expect(result).toEqual(createdUser);
+    expect(axios.post).toHaveBeenCalledWith(
+      'https://api.example.com/users', 
+      newUser
+    );
+  });
+});
+</code></pre>
+                <ul>
+                    <li>Mocks entire modules (e.g., `axios`, `fs`, database clients).</li>
+                    <li>Prevents actual external calls during unit tests.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide17" class="slide" data-slide-id="17">
+            <div class="slide-content">
+                <h2>Partial Module Mocking</h2>
+                <pre><code>// For modules where you want to keep some real functionality
+import fs from 'fs';
+
+// Mock specific methods, keep others real
+jest.mock('fs', () => {
+  const originalModule = jest.requireActual('fs');
+  
+  return {
+    ...originalModule,
+    // Override only specific methods
+    readFileSync: jest.fn().mockReturnValue('mocked content'),
+  };
+});
+
+test('reads file with mock', () => {
+  const content = fs.readFileSync('someFile.txt');
+  expect(content).toBe('mocked content');
+  expect(fs.readFileSync).toHaveBeenCalledWith('someFile.txt');
+  
+  // Other fs methods still work normally
+  expect(typeof fs.writeFileSync).toBe('function');
+});
+</code></pre>
+                <p>Use `jest.requireActual()` to create partial mocks when you need to preserve some real behavior.</p>
+            </div>
+        </section>
+
+        <section id="slide18" class="slide" data-slide-id="18">
+            <div class="slide-content">
+                <h2>`jest.spyOn()`: Spying on Existing Methods</h2>
+                <pre><code>const calculator = {
+  add: (a, b) => a + b,
+  subtract: (a, b) => a - b,
+};
+
+describe('calculator', () => {
+  test('add method should be called', () => {
+    // Modern approach using spyOn
+    const addSpy = jest.spyOn(calculator, 'add');
+    
+    const result = calculator.add(2, 3);
+    
+    expect(result).toBe(5); // Real implementation still works
+    expect(addSpy).toHaveBeenCalledWith(2, 3);
+    expect(addSpy).toHaveBeenCalledTimes(1);
+    
+    addSpy.mockRestore(); // Clean up spy
+  });
+  
+  test('can override implementation temporarily', () => {
+    const subtractSpy = jest.spyOn(calculator, 'subtract')
+      .mockImplementation(() => 42); // Override implementation
+    
+    expect(calculator.subtract(10, 5)).toBe(42); // Returns mock value
+    
+    subtractSpy.mockRestore(); // Restore original
+    expect(calculator.subtract(10, 5)).toBe(5); // Original works again
+  });
+});
+</code></pre>
+                <ul>
+                    <li>Observes calls to <strong>existing</strong> methods without changing their implementation by default.</li>
+                    <li>Can also temporarily override implementations.</li>
+                    <li>`mockRestore()` returns to the original implementation.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide19" class="slide" data-slide-id="19">
+            <div class="slide-content">
+                <h2>Best Practices for Writing Good Tests</h2>
+                <ul>
+                    <li><strong>Readable & Descriptive:</strong> Clear names for `describe` blocks and `test` cases.</li>
+                    <li><strong>Arrange-Act-Assert (AAA):</strong>
+                        <ul>
+                            <li><strong>Arrange:</strong> Set up test data/mocks.</li>
+                            <li><strong>Act:</strong> Execute the code under test.</li>
+                            <li><strong>Assert:</strong> Verify the outcome.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Test One Thing:</strong> Each test should ideally verify a single piece of functionality.
+                    </li>
+                    <li><strong>Independent & Repeatable:</strong> Tests should not rely on order or external state.</li>
+                    <li><strong>Don't Test Implementation Details:</strong> Test *behavior*, not internal mechanics.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide20" class="slide" data-slide-id="20">
+            <div class="slide-content">
+                <h2>Test Coverage: Measuring Our Progress</h2>
+                <pre><code>npx jest --coverage
+</code></pre>
+                <ul>
+                    <li>Shows which lines/branches of code are executed by tests.</li>
+                    <li>Helps identify untested areas.</li>
+                    <li><strong>Caution:</strong> High coverage != good tests. Still need meaningful assertions.</li>
+                    <li>Aim for good coverage on critical business logic.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide21" class="slide" data-slide-id="21">
+            <div class="slide-content">
+                <h2>Integrating Tests into Your Workflow</h2>
+                <ul>
+                    <li><strong>Run on Save:</strong> Use `jest --watchAll` for instant feedback.</li>
+                    <li><strong>Pre-commit Hooks:</strong> Integrate with husky/lint-staged to run tests before commits.
+                    </li>
+                    <li><strong>CI/CD Pipelines:</strong> Automate test runs on every push to a repository (e.g., GitHub
+                        Actions, GitLab CI).</li>
+                    <li><strong>Code Reviews:</strong> Encourage reviewing tests alongside feature code.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="slide22" class="slide" data-slide-id="22">
+            <div class="slide-content">
+                <h2>Q&A / Discussion</h2>
+                <p>What questions do you have about Unit Testing with Jest?</p>
+                <p>Let's discuss how we can apply this to our current projects!</p>
+            </div>
+        </section>
+
+        <section id="slide23" class="slide" data-slide-id="23">
+            <div class="slide-content">
+                <h2>Thank You!</h2>
+                <p>Happy Testing!</p>
+                <div class="visual-placeholder icon-row">
+                    <i class="material-icons-round" style="color: var(--md-primary);">thumb_up</i>
+                    <i class="material-icons-round" style="color: #4CAF50;">check_circle</i>
+                    <i class="material-icons-round" style="color: #FFC107;">celebration</i>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="controls" role="toolbar" aria-label="Presentation controls">
+        <button id="prev-button" aria-label="Previous slide"><i class="material-icons-round">arrow_back</i> <span>Previous</span></button>
+        <div id="slide-counter" aria-live="polite"></div>
+        <button id="next-button" aria-label="Next slide"><span>Next</span> <i class="material-icons-round">arrow_forward</i></button>
+        <select id="slide-selector" aria-label="Jump to slide"></select>
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prev-button');
+        const nextBtn = document.getElementById('next-button');
+        const slideCounter = document.getElementById('slide-counter');
+        const slideSelector = document.getElementById('slide-selector');
+
+        let currentSlideIndex = 0;
+        const totalSlides = slides.length;
+
+        // Function to show a specific slide
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+            currentSlideIndex = index;
+            updateControls();
+            updateProgressBar();
+        }
+
+        // Function to update button states and counter
+        function updateControls() {
+            prevBtn.disabled = currentSlideIndex === 0;
+            nextBtn.disabled = currentSlideIndex === totalSlides - 1;
+            slideCounter.textContent = `${currentSlideIndex + 1} / ${totalSlides}`;
+            slideSelector.value = currentSlideIndex; // Update dropdown
+        }
+
+        // Event Listeners for buttons
+        prevBtn.addEventListener('click', () => {
+            if (currentSlideIndex > 0) {
+                showSlide(currentSlideIndex - 1);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlideIndex < totalSlides - 1) {
+                showSlide(currentSlideIndex + 1);
+            }
+        });
+
+        // Initialize slide selector dropdown
+        function initializeSlideSelector() {
+            slideSelector.innerHTML = ''; // Clear any existing options
+            for (let i = 0; i < totalSlides; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                
+                // Get slide title from h1, h2 or default to slide number
+                const slide = slides[i];
+                const heading = slide.querySelector('h1, h2, h3');
+                const title = heading ? heading.textContent : `Slide ${i + 1}`;
+                
+                option.textContent = `${i + 1}: ${title}`;
+                slideSelector.appendChild(option);
+            }
+            
+            slideSelector.addEventListener('change', (event) => {
+                showSlide(parseInt(event.target.value, 10));
+            });
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progress = ((currentSlideIndex + 1) / totalSlides) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        // Function to handle keyboard navigation
+        function handleKeyboardNavigation(event) {
+            // Only process if not in an input field
+            if (event.target.tagName.toLowerCase() === 'input' || 
+                event.target.tagName.toLowerCase() === 'textarea') {
+                return;
+            }
+            
+            switch (event.key) {
+                case 'ArrowRight':
+                    if (currentSlideIndex < totalSlides - 1) {
+                        showSlide(currentSlideIndex + 1);
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (currentSlideIndex > 0) {
+                        showSlide(currentSlideIndex - 1);
+                    }
+                    break;
+                case 'Home':
+                    showSlide(0);
+                    break;
+                case 'End':
+                    showSlide(totalSlides - 1);
+                    break;
+                case 'm':
+                case 'M':
+                    const menu = document.getElementById('slide-menu');
+                    const isCollapsed = menu.classList.contains('collapsed');
+                    menu.classList.toggle('collapsed', !isCollapsed);
+                    document.body.classList.toggle('menu-open', !isCollapsed);
+                    break;
+                case 't':
+                case 'T':
+                    document.getElementById('theme-toggle').click();
+                    break;
+                case 'Escape':
+                    const shortcutModal = document.getElementById('shortcut-modal');
+                    if (shortcutModal.classList.contains('active')) {
+                        shortcutModal.classList.remove('active');
+                    } else if (!document.getElementById('slide-menu').classList.contains('collapsed')) {
+                        document.getElementById('slide-menu').classList.add('collapsed');
+                        document.body.classList.remove('menu-open');
+                    }
+                    break;
+                case '?':
+                    document.getElementById('shortcut-modal').classList.toggle('active');
+                    break;
+                default:
+                    // Number keys 1-9
+                    if (!isNaN(parseInt(event.key)) && event.key >= 1 && event.key <= 9) {
+                        const slideIndex = parseInt(event.key) - 1;
+                        if (slideIndex < totalSlides) {
+                            showSlide(slideIndex);
+                        }
+                    }
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const slideMenu = document.getElementById('slide-menu');
+            const menuToggle = document.getElementById('menu-toggle');
+            const body = document.body;
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            const keyboardHelp = document.getElementById('keyboard-help');
+            const shortcutModal = document.getElementById('shortcut-modal');
+            const modalClose = document.querySelector('.modal-close');
+            const progressBar = document.getElementById('progress-bar');
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', handleKeyboardNavigation);
+            
+            // Initialize slide selector
+            initializeSlideSelector();
+            
+            // Keyboard shortcuts modal
+            keyboardHelp.addEventListener('click', function() {
+                shortcutModal.classList.add('active');
+            });
+            
+            modalClose.addEventListener('click', function() {
+                shortcutModal.classList.remove('active');
+            });
+            
+            // Close modal on outside click
+            shortcutModal.addEventListener('click', function(e) {
+                if (e.target === shortcutModal) {
+                    shortcutModal.classList.remove('active');
+                }
+            });
+            
+            // Toggle menu state
+            menuToggle.addEventListener('click', function() {
+                body.classList.toggle('menu-open');
+                const isOpen = body.classList.contains('menu-open');
+                slideMenu.classList.toggle('collapsed', !isOpen);
+                menuToggle.setAttribute('aria-expanded', isOpen);
+            });
+
+            // Initialize menu as collapsed
+            slideMenu.classList.add('collapsed');
+
+            // Theme toggle
+            themeToggle.addEventListener('click', function() {
+                if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                    document.documentElement.removeAttribute('data-theme');
+                    themeIcon.textContent = 'dark_mode';
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    themeIcon.textContent = 'light_mode';
+                }
+            });
+            
+            // Check for saved theme preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.textContent = 'light_mode';
+            }
+            
+            // Populate slide menu
+            populateSlideMenu();
+            
+            // Initialize initial slide
+            showSlide(currentSlideIndex);
+            updateProgressBar();
+        });
+        
+        // Populate the slide menu
+        function populateSlideMenu() {
+            const slideMenu = document.getElementById('slide-menu');
+            slideMenu.innerHTML = ''; // Clear existing content
+            
+            // Add heading
+            const menuHeader = document.createElement('div');
+            menuHeader.className = 'menu-header';
+            menuHeader.innerHTML = '<h3>Slides</h3>';
+            slideMenu.appendChild(menuHeader);
+            
+            // Create menu items container
+            const menuItems = document.createElement('div');
+            menuItems.id = 'slide-menu-items';
+            menuItems.setAttribute('role', 'menu');
+            slideMenu.appendChild(menuItems);
+            
+            // Add each slide
+            slides.forEach((slide, index) => {
+                const slideTitle = slide.querySelector('h1, h2, h3')?.textContent || `Slide ${index + 1}`;
+                const activeClass = index === currentSlideIndex ? 'active' : '';
+                
+                const menuItem = document.createElement('div');
+                menuItem.className = `slide-menu-item ${activeClass}`;
+                menuItem.setAttribute('data-slide', index);
+                menuItem.setAttribute('role', 'menuitem');
+                menuItem.setAttribute('tabindex', '0');
+                menuItem.setAttribute('aria-label', `Go to slide ${index + 1}: ${slideTitle}`);
+                
+                const slideNumber = document.createElement('div');
+                slideNumber.className = 'slide-number';
+                slideNumber.textContent = index + 1;
+                
+                const slideTitleElement = document.createElement('div');
+                slideTitleElement.className = 'slide-title';
+                slideTitleElement.textContent = slideTitle;
+                
+                menuItem.appendChild(slideNumber);
+                menuItem.appendChild(slideTitleElement);
+                
+                menuItem.addEventListener('click', () => {
+                    showSlide(index);
+                    updateMenuItems();
+                    
+                    // Close menu on mobile
+                    if (window.innerWidth <= 768) {
+                        document.body.classList.remove('menu-open');
+                        slideMenu.classList.add('collapsed');
+                    }
+                });
+                
+                menuItems.appendChild(menuItem);
+            });
+        }
+        
+        // Update active menu item
+        function updateMenuItems() {
+            document.querySelectorAll('.slide-menu-item').forEach((item, index) => {
+                if (index === currentSlideIndex) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
